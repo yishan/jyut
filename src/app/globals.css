@@ -1,0 +1,115 @@
+@import 'tailwindcss';
+
+@custom-variant dark (&:where(.dark, .dark *));
+
+@theme {
+  --font-sans:
+    var(--font-inter), ui-sans-serif, system-ui, -apple-system, 'Segoe UI',
+    'PingFang HK', 'Noto Sans HK', 'Microsoft JhengHei', sans-serif;
+  --font-display: var(--font-serif), 'Iowan Old Style', 'Songti TC', serif;
+  --font-han:
+    'PingFang HK', 'Noto Sans HK', 'Hiragino Sans CNS', 'Microsoft JhengHei',
+    'Source Han Sans HK', sans-serif;
+  --font-mono: ui-monospace, 'SF Mono', 'Cascadia Code', Menlo, monospace;
+
+  --color-paper: oklch(98.6% 0.006 90);
+  --color-ink: oklch(24% 0.015 250);
+  --color-jade-50: oklch(97% 0.02 175);
+  --color-jade-100: oklch(93% 0.045 175);
+  --color-jade-300: oklch(80% 0.09 173);
+  --color-jade-500: oklch(58% 0.11 172);
+  --color-jade-600: oklch(50% 0.1 172);
+  --color-jade-700: oklch(42% 0.085 172);
+  --color-jade-900: oklch(28% 0.055 172);
+  --color-vermilion-500: oklch(62% 0.17 32);
+  --color-vermilion-300: oklch(76% 0.12 32);
+}
+
+:root {
+  color-scheme: light;
+  --surface: var(--color-paper);
+  --surface-raised: oklch(100% 0 0);
+  --surface-sunken: oklch(96% 0.006 90);
+  --border-subtle: oklch(90% 0.008 90);
+  --text-primary: var(--color-ink);
+  --text-secondary: oklch(48% 0.012 250);
+  --text-faint: oklch(64% 0.012 250);
+  --accent: var(--color-jade-600);
+  --accent-soft: var(--color-jade-50);
+  --accent-text: var(--color-jade-700);
+}
+
+.dark {
+  color-scheme: dark;
+  --surface: oklch(19% 0.012 250);
+  --surface-raised: oklch(23% 0.014 250);
+  --surface-sunken: oklch(16% 0.012 250);
+  --border-subtle: oklch(31% 0.014 250);
+  --text-primary: oklch(94% 0.006 250);
+  --text-secondary: oklch(74% 0.012 250);
+  --text-faint: oklch(58% 0.012 250);
+  --accent: var(--color-jade-300);
+  --accent-soft: oklch(26% 0.035 172);
+  --accent-text: var(--color-jade-300);
+}
+
+@layer base {
+  * {
+    border-color: var(--border-subtle);
+  }
+
+  body {
+    background-color: var(--surface);
+    color: var(--text-primary);
+    font-family: var(--font-sans);
+    -webkit-font-smoothing: antialiased;
+    text-rendering: optimizeLegibility;
+  }
+
+  ::selection {
+    background-color: var(--accent-soft);
+    color: var(--accent-text);
+  }
+
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+  }
+}
+
+@layer components {
+  /* Ruby annotation: browsers vary wildly, so the sizing is set explicitly. */
+  .ruby-run ruby {
+    ruby-position: over;
+    ruby-align: center;
+    /* A reading is usually wider than its character, so the base is stretched to
+       match. Without this margin adjacent readings end up touching. */
+    margin-inline: 0.08em;
+  }
+
+  .ruby-run rt {
+    font-family: var(--font-mono);
+    font-size: 0.4em;
+    font-weight: 500;
+    line-height: 1.4;
+    letter-spacing: -0.015em;
+    padding-inline: 0.35em;
+    color: var(--accent-text);
+    user-select: text;
+  }
+
+  /* Firefox needs the annotation nudged away from the character. */
+  @supports (-moz-appearance: none) {
+    .ruby-run rt {
+      margin-bottom: 0.1em;
+    }
+  }
+}
+
+/* The reading list is scanned vertically; keep the scrollbar unobtrusive. */
+@supports (scrollbar-width: thin) {
+  .thin-scroll {
+    scrollbar-width: thin;
+    scrollbar-color: var(--border-subtle) transparent;
+  }
+}

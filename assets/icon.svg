@@ -1,0 +1,24 @@
+<!--
+  Source artwork for the site icon. Rasterised by `npm run icons` into
+  src/app/{icon.png,apple-icon.png,favicon.ico} — the glyph is baked into a
+  bitmap so it renders identically on machines with no CJK font installed.
+-->
+<svg xmlns="http://www.w3.org/2000/svg" width="512" height="512" viewBox="0 0 512 512">
+  <defs>
+    <linearGradient id="jade" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0%" stop-color="#00805f" />
+      <stop offset="100%" stop-color="#005c48" />
+    </linearGradient>
+  </defs>
+  <rect width="512" height="512" rx="112" ry="112" fill="url(#jade)" />
+  <text
+    x="256"
+    y="256"
+    fill="#fcfaf6"
+    font-family="PingFang HK, Noto Sans HK, Hiragino Sans CNS, Source Han Sans HK, sans-serif"
+    font-size="312"
+    font-weight="600"
+    text-anchor="middle"
+    dominant-baseline="central"
+  >粵</text>
+</svg>
