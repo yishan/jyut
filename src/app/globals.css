@@ -21,7 +21,8 @@
   --color-jade-600: oklch(50% 0.1 172);
   --color-jade-700: oklch(42% 0.085 172);
   --color-jade-900: oklch(28% 0.055 172);
-  --color-vermilion-500: oklch(62% 0.17 32);
+  /* L 55% is the lightest that keeps error text at 4.5:1 on every light surface. */
+  --color-vermilion-500: oklch(55% 0.17 32);
   --color-vermilion-300: oklch(76% 0.12 32);
 }
 
@@ -33,7 +34,8 @@
   --border-subtle: oklch(90% 0.008 90);
   --text-primary: var(--color-ink);
   --text-secondary: oklch(48% 0.012 250);
-  --text-faint: oklch(64% 0.012 250);
+  /* Carries real body text (footer, notices, hints): 4.5:1 on all three surfaces. */
+  --text-faint: oklch(53% 0.012 250);
   --accent: var(--color-jade-600);
   --accent-soft: var(--color-jade-50);
   --accent-text: var(--color-jade-700);
@@ -47,7 +49,7 @@
   --border-subtle: oklch(31% 0.014 250);
   --text-primary: oklch(94% 0.006 250);
   --text-secondary: oklch(74% 0.012 250);
-  --text-faint: oklch(58% 0.012 250);
+  --text-faint: oklch(62% 0.012 250);
   --accent: var(--color-jade-300);
   --accent-soft: oklch(26% 0.035 172);
   --accent-text: var(--color-jade-300);
@@ -58,11 +60,20 @@
     border-color: var(--border-subtle);
   }
 
+  html {
+    -webkit-text-size-adjust: 100%;
+    /* Every button below gets its own :active state to replace the flash. */
+    -webkit-tap-highlight-color: transparent;
+    /* A weight that never loaded falls back visibly instead of being faked. */
+    font-synthesis: none;
+  }
+
   body {
     background-color: var(--surface);
     color: var(--text-primary);
     font-family: var(--font-sans);
     -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
     text-rendering: optimizeLegibility;
   }
 
@@ -75,6 +86,56 @@
     outline: 2px solid var(--accent);
     outline-offset: 2px;
   }
+
+  /* The placeholder default (50% currentColor) is 1.87:1 in light mode. */
+  ::placeholder {
+    color: var(--text-faint);
+    opacity: 1;
+  }
+
+  button,
+  a,
+  input,
+  textarea,
+  [role='button'] {
+    touch-action: manipulation;
+  }
+
+  button {
+    user-select: none;
+    -webkit-user-select: none;
+  }
+
+  button:not(:disabled):active {
+    transform: scale(0.97);
+  }
+
+  h1,
+  h2 {
+    text-wrap: balance;
+  }
+
+  p {
+    text-wrap: pretty;
+  }
+
+  /* Set for two frames while the theme flips, so surfaces don't each tween at
+     their own speed. */
+  .no-transitions,
+  .no-transitions * {
+    transition: none !important;
+  }
+}
+
+/* Buttons transition their colours and the press scale, by name. */
+@utility transition-press {
+  transition:
+    color 150ms ease,
+    background-color 150ms ease,
+    border-color 150ms ease,
+    opacity 150ms ease,
+    box-shadow 150ms ease,
+    transform 100ms ease-out;
 }
 
 @layer components {

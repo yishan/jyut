@@ -18,10 +18,33 @@ export function Card({
   )
 }
 
+/** Each card's title, so screen-reader users can jump between sections. */
 export function SectionLabel({ children }: { children: ReactNode }) {
   return (
-    <span className="text-[11px] font-semibold tracking-[0.14em] whitespace-nowrap text-[var(--text-faint)] uppercase">
+    <h2 className="text-[11px] font-semibold tracking-[0.14em] whitespace-nowrap text-[var(--text-faint)] uppercase">
       {children}
+    </h2>
+  )
+}
+
+/**
+ * Stacks both labels in one grid cell, so a button that swaps "Copy" for
+ * "Copied" keeps the wider width instead of shoving its neighbours. The hidden
+ * one is `visibility: hidden`, which also drops it from the accessible name.
+ */
+export function SwapLabel({
+  showAlt,
+  label,
+  alt,
+}: {
+  showAlt: boolean
+  label: ReactNode
+  alt: ReactNode
+}) {
+  return (
+    <span className="inline-grid justify-items-center">
+      <span className={`col-start-1 row-start-1 ${showAlt ? 'invisible' : ''}`}>{label}</span>
+      <span className={`col-start-1 row-start-1 ${showAlt ? '' : 'invisible'}`}>{alt}</span>
     </span>
   )
 }
@@ -52,9 +75,9 @@ export function Segmented<T extends string>({
             role="radio"
             aria-checked={active}
             onClick={() => onChange(option.value)}
-            className={`flex-1 rounded-lg px-2 py-1.5 text-xs leading-snug transition-colors sm:px-3 sm:text-sm ${
+            className={`flex-1 rounded-lg px-2 py-1.5 text-xs leading-snug transition-press sm:px-3 sm:text-sm ${
               active
-                ? 'bg-[var(--surface-raised)] font-medium text-[var(--text-primary)] shadow-sm'
+                ? 'bg-[var(--surface-raised)] text-[var(--text-primary)] shadow-sm'
                 : 'text-[var(--text-secondary)] hover:text-[var(--text-primary)]'
             }`}
           >
@@ -111,7 +134,8 @@ export function Button({
   title?: string
 }) {
   const base =
-    'inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-colors disabled:opacity-40 disabled:cursor-not-allowed'
+    // The ::before grows the 34px button to a 46px hit area without moving it.
+    'relative inline-flex items-center gap-1.5 rounded-lg px-3 py-1.5 text-sm font-medium transition-press before:absolute before:-inset-y-1.5 before:inset-x-0 disabled:opacity-40 disabled:cursor-not-allowed'
   const styles =
     variant === 'solid'
       ? 'bg-[var(--accent)] text-[var(--surface-raised)] hover:opacity-90'

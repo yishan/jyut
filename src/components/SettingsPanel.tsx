@@ -38,7 +38,7 @@ export function SettingsPanel({
                 type="button"
                 onClick={() => onScheme(option.id)}
                 aria-pressed={active}
-                className={`rounded-xl border px-3 py-2 text-left transition-colors ${
+                className={`rounded-xl border px-3 py-2 text-left transition-press ${
                   active
                     ? 'border-[var(--accent)] bg-[var(--accent-soft)]'
                     : 'hover:bg-[var(--surface-sunken)]'
@@ -47,7 +47,7 @@ export function SettingsPanel({
                 <span
                   className={`block text-sm ${
                     active
-                      ? 'font-medium text-[var(--accent-text)]'
+                      ? 'text-[var(--accent-text)]'
                       : 'text-[var(--text-primary)]'
                   }`}
                 >

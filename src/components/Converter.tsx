@@ -22,7 +22,7 @@ import { useSpeech } from '@/lib/tts'
 import { Header } from './Header'
 import { ResultView } from './ResultView'
 import { LayoutPicker, SettingsPanel } from './SettingsPanel'
-import { Button, Card, SectionLabel } from './ui'
+import { Button, Card, SectionLabel, SwapLabel } from './ui'
 
 const MAX_CHARS = 5000
 const SAMPLE = '咁啱老世要求佢等陣要開會，剩低嘅嘢我會搞掂㗎喇。'
@@ -290,13 +290,20 @@ export function Converter() {
       <Card className="p-5">
         {/* Wraps on narrow screens: the English labels don't fit on one row at 375px. */}
         <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-2">
-          <SectionLabel>{t('input.label')}</SectionLabel>
+          <SectionLabel>
+            <label htmlFor="source-text" className="cursor-text">
+              {t('input.label')}
+            </label>
+          </SectionLabel>
+          {/* The ::before on each button grows its 24px height to a 40px hit
+              area: as far as it goes without overlapping the label above when
+              the row wraps. */}
           <div className="flex flex-wrap items-center gap-1.5 whitespace-nowrap">
             {original !== null && (
               <button
                 type="button"
                 onClick={undoTranslate}
-                className="rounded-lg px-2 py-1 text-xs text-[var(--accent-text)] hover:bg-[var(--surface-sunken)]"
+                className="relative rounded-lg px-2 py-1 text-xs text-[var(--accent-text)] transition-press before:absolute before:-inset-y-2 before:inset-x-0 hover:bg-[var(--surface-sunken)]"
               >
                 {t('translate.undo')}
               </button>
@@ -306,17 +313,26 @@ export function Converter() {
               onClick={translate}
               disabled={!text.trim() || translating}
               title={t('translate.hint')}
-              className="inline-flex items-center gap-1.5 rounded-lg border border-[var(--accent)] px-2.5 py-1 text-xs font-medium text-[var(--accent-text)] transition-colors hover:bg-[var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-40"
+              className="relative inline-flex items-center rounded-lg border border-[var(--accent)] px-2.5 py-1 text-xs font-medium text-[var(--accent-text)] transition-press before:absolute before:-inset-y-2 before:inset-x-0 hover:bg-[var(--accent-soft)] disabled:cursor-not-allowed disabled:opacity-40"
             >
-              {translating && (
-                <span className="size-2.5 animate-spin rounded-full border border-current border-t-transparent" />
-              )}
-              {translating ? t('translate.running') : t('translate.action')}
+              <SwapLabel
+                showAlt={translating}
+                label={t('translate.action')}
+                alt={
+                  <span className="inline-flex items-center gap-1.5">
+                    <span
+                      aria-hidden="true"
+                      className="size-2.5 animate-spin rounded-full border border-current border-t-transparent motion-reduce:[animation-play-state:paused]"
+                    />
+                    {t('translate.running')}
+                  </span>
+                }
+              />
             </button>
             <button
               type="button"
               onClick={loadSample}
-              className="rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]"
+              className="relative rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] transition-press before:absolute before:-inset-y-2 before:inset-x-0 hover:bg-[var(--surface-sunken)]"
             >
               {t('input.sample')}
             </button>
@@ -324,7 +340,7 @@ export function Converter() {
               type="button"
               onClick={clearInput}
               disabled={!text && !translating}
-              className="rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)] disabled:opacity-40"
+              className="relative rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] transition-press before:absolute before:-inset-y-2 before:inset-x-0 hover:bg-[var(--surface-sunken)] disabled:opacity-40"
             >
               {t('input.clear')}
             </button>
@@ -332,8 +348,21 @@ export function Converter() {
         </div>
 
         <textarea
+          id="source-text"
           value={text}
           onChange={(event) => editInput(event.target.value)}
+          onKeyDown={(event) => {
+            // Enter mid-IME confirms a candidate; only a finished Cmd/Ctrl+Enter
+            // means "translate".
+            if (
+              (event.metaKey || event.ctrlKey) &&
+              event.key === 'Enter' &&
+              !event.nativeEvent.isComposing
+            ) {
+              event.preventDefault()
+              void translate()
+            }
+          }}
           // Keystrokes during a rewrite would be overwritten by the next chunk.
           readOnly={translating}
           aria-busy={translating}
@@ -344,7 +373,7 @@ export function Converter() {
         />
 
         <div className="mt-2 flex items-center justify-between gap-3 text-xs text-[var(--text-faint)]">
-          <span>
+          <span className="tabular-nums">
             {chars.length} / {MAX_CHARS} {t('input.chars')}
           </span>
           {overLimit && (
@@ -379,12 +408,20 @@ export function Converter() {
                 disabled={!clamped}
                 title={speech.hasCantoneseVoice ? undefined : t('notice.noVoice')}
               >
-                {speech.speaking ? t('result.stop') : t('result.speak')}
+                <SwapLabel
+                  showAlt={speech.speaking}
+                  label={t('result.speak')}
+                  alt={t('result.stop')}
+                />
               </Button>
             )}
             <Button onClick={copy} disabled={!ready || pieces.length === 0} variant="solid">
-              {copied ? t('result.copied') : t('result.copy')}
+              <SwapLabel showAlt={copied} label={t('result.copy')} alt={t('result.copied')} />
             </Button>
+            {/* A label swap inside a focused button isn't announced; this is. */}
+            <span role="status" className="sr-only">
+              {copied ? t('result.copied') : ''}
+            </span>
           </div>
         </div>
 

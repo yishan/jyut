@@ -203,7 +203,7 @@ export function ResultView({
               {t('picker.none')}
             </p>
           ) : (
-            <ul className="thin-scroll max-h-56 overflow-y-auto">
+            <ul className="thin-scroll max-h-56 overflow-y-auto overscroll-contain">
               {anchor.piece.candidates.map((candidate) => {
                 const selected = candidate === anchor.piece.jyutping
                 const spelt = respell(candidate, scheme, table).text
@@ -215,7 +215,7 @@ export function ResultView({
                         onPick(anchor.key, candidate)
                         close()
                       }}
-                      className={`flex w-full items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-left transition-colors hover:bg-[var(--surface-sunken)] ${
+                      className={`flex w-full items-baseline justify-between gap-2 rounded-lg px-2 py-1.5 text-left transition-press hover:bg-[var(--surface-sunken)] ${
                         selected ? 'bg-[var(--accent-soft)]' : ''
                       }`}
                     >
@@ -243,7 +243,7 @@ export function ResultView({
               <button
                 type="button"
                 onClick={() => speech.speak(anchor.piece.char)}
-                className="rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]"
+                className="relative rounded-lg px-2 py-1 text-xs transition-press before:absolute before:-inset-y-1.5 before:inset-x-0 text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]"
               >
                 {t('picker.speak')}
               </button>
@@ -255,7 +255,7 @@ export function ResultView({
                   onPick(anchor.key, null)
                   close()
                 }}
-                className="ml-auto rounded-lg px-2 py-1 text-xs text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]"
+                className="relative ml-auto rounded-lg px-2 py-1 text-xs transition-press before:absolute before:-inset-y-1.5 before:inset-x-0 text-[var(--text-secondary)] hover:bg-[var(--surface-sunken)]"
               >
                 {t('picker.reset')}
               </button>
