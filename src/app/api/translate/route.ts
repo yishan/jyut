@@ -138,21 +138,25 @@ function toPlainTextStream(body: ReadableStream<Uint8Array>): ReadableStream<Uin
   let finish: string | null = null
 
   const handleLine = (line: string, controller: ReadableStreamDefaultController<Uint8Array>) => {
-    if (!line.startsWith('data:')) return
+    if (!line.startsWith('data:')) return false
     const payload = line.slice(5).trim()
-    if (!payload || payload === '[DONE]') return
+    if (!payload || payload === '[DONE]') return false
 
     try {
       const choice = JSON.parse(payload)?.choices?.[0]
+      if (typeof choice?.finish_reason === 'string') finish = choice.finish_reason
       const delta = choice?.delta?.content
       if (typeof delta === 'string' && delta) {
         const clean = delta.replaceAll(TRAILER_MARK, '')
-        if (clean) controller.enqueue(encoder.encode(clean))
+        if (clean) {
+          controller.enqueue(encoder.encode(clean))
+          return true
+        }
       }
-      if (typeof choice?.finish_reason === 'string') finish = choice.finish_reason
     } catch {
       // A malformed chunk is not worth killing the whole stream over.
     }
+    return false
   }
 
   const end = (controller: ReadableStreamDefaultController<Uint8Array>) => {
@@ -167,27 +171,33 @@ function toPlainTextStream(body: ReadableStream<Uint8Array>): ReadableStream<Uin
 
   return new ReadableStream({
     async pull(controller) {
-      let chunk: ReadableStreamReadResult<Uint8Array>
-      try {
-        chunk = await reader.read()
-      } catch {
-        // Whatever `finish` says stands: a drop after the model already
-        // reported `stop` lost nothing, and a drop before it stays `incomplete`.
-        end(controller)
-        return
+      // Metadata and partial events don't satisfy the pending downstream read.
+      let emitted = false
+      while (!emitted) {
+        let chunk: ReadableStreamReadResult<Uint8Array>
+        try {
+          chunk = await reader.read()
+        } catch {
+          // Whatever `finish` says stands: a drop after the model already
+          // reported `stop` lost nothing, and a drop before it stays `incomplete`.
+          end(controller)
+          return
+        }
+
+        if (chunk.done) {
+          end(controller)
+          return
+        }
+
+        buffer += decoder.decode(chunk.value, { stream: true })
+
+        // SSE events are newline-delimited; the last line may be a partial event.
+        const lines = buffer.split('\n')
+        buffer = lines.pop() ?? ''
+        for (const line of lines) {
+          if (handleLine(line, controller)) emitted = true
+        }
       }
-
-      if (chunk.done) {
-        end(controller)
-        return
-      }
-
-      buffer += decoder.decode(chunk.value, { stream: true })
-
-      // SSE events are newline-delimited; the last line may be a partial event.
-      const lines = buffer.split('\n')
-      buffer = lines.pop() ?? ''
-      for (const line of lines) handleLine(line, controller)
     },
     cancel(reason) {
       void reader.cancel(reason)
